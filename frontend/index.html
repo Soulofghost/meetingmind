@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeetingMind | Executive Meeting Intelligence & Action Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-crest">MM</div>
+        <div class="brand-text">
+          <h1>Meeting<span>Mind</span></h1>
+          <p class="tagline">Executive Intelligence & Action Tracking</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="system-status"><span class="pulse-dot"></span> System Live</span>
+        <button id="btn-new-meeting" class="btn btn-gold">+ New Ingestion</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Metric Ribbon -->
+  <section class="metrics-ribbon">
+    <div class="metric-card">
+      <div class="metric-label">Meetings Synthesized</div>
+      <div class="metric-value" id="kpi-meetings">--</div>
+      <div class="metric-sub">Session history logged</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Action Items Tracked</div>
+      <div class="metric-value" id="kpi-actions">--</div>
+      <div class="metric-sub">Across all attendees</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Key Decisions Logged</div>
+      <div class="metric-value" id="kpi-decisions">--</div>
+      <div class="metric-sub">Strategic & architectural</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Action Completion Rate</div>
+      <div class="metric-value highlight" id="kpi-rate">--%</div>
+      <div class="metric-sub">Execution velocity</div>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <main class="main-layout">
+    <!-- Sidebar: Meeting Archive -->
+    <aside class="meeting-sidebar">
+      <div class="sidebar-header">
+        <h2>Executive Archives</h2>
+        <input type="text" id="archive-search" placeholder="Search sessions..." class="search-input">
+      </div>
+      <div class="meeting-list" id="meeting-list">
+        <div class="loading-state">Loading archives...</div>
+      </div>
+    </aside>
+
+    <!-- Workspace -->
+    <section class="workspace-area">
+      <!-- Ingestion Modal / Panel (Hidden when viewing detail) -->
+      <div id="ingest-panel" class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="badge-pill">Intelligence Intake</span>
+            <h2>Ingest & Synthesize Transcript</h2>
+            <p>Paste your conference or call transcript to automatically extract decisions, speaker talk-time, and assignable action items.</p>
+          </div>
+          <div class="preset-selector">
+            <label for="sample-select">Load Benchmark Sample:</label>
+            <select id="sample-select" class="custom-select">
+              <option value="">-- Choose Sample --</option>
+              <option value="cloud">Q3 Cloud Infrastructure & Architecture Sync</option>
+              <option value="board">Executive Strategy & Capital Allocation</option>
+              <option value="product">Product Launch Cadence & Security Review</option>
+            </select>
+          </div>
+        </div>
+
+        <form id="ingest-form" class="ingest-form">
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="meeting-title">Meeting Title</label>
+              <input type="text" id="meeting-title" required placeholder="e.g. Q3 Scalability & Microservices Alignment" class="text-input">
+            </div>
+            <div class="form-group">
+              <label for="meeting-date">Date</label>
+              <input type="date" id="meeting-date" class="text-input">
+            </div>
+            <div class="form-group">
+              <label for="meeting-duration">Duration (Mins)</label>
+              <input type="number" id="meeting-duration" value="45" min="5" max="300" class="text-input">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="raw-transcript">Transcript Input (Supports standard Speaker: / [Timestamp] notations)</label>
+            <textarea id="raw-transcript" rows="12" required class="code-textarea" placeholder="[00:00:15] Sarah Chen: Welcome everyone...&#10;Marcus Vance: I will deploy the Redis cluster by Friday..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="btn-clear-ingest" class="btn btn-secondary">Clear</button>
+            <button type="submit" id="btn-submit-ingest" class="btn btn-gold">Synthesize Meeting Intelligence</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Detail View Panel (Active when viewing a meeting) -->
+      <div id="detail-panel" class="card-panel hidden">
+        <div class="panel-header detail-header">
+          <div>
+            <div class="meta-row">
+              <span class="badge-pill" id="detail-date">2026-11-13</span>
+              <span class="badge-pill duration" id="detail-duration">45 mins</span>
+              <span class="badge-pill attendees" id="detail-attendees">4 Participants</span>
+            </div>
+            <h2 id="detail-title">Meeting Title</h2>
+          </div>
+          <div class="detail-actions">
+            <button id="btn-export-markdown" class="btn btn-secondary">Export Brief</button>
+            <button id="btn-delete-meeting" class="btn btn-danger">Delete</button>
+          </div>
+        </div>
+
+        <!-- Detail Tabs Navigation -->
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-tab="tab-summary">Executive Summary</button>
+          <button class="tab-btn" data-tab="tab-actions">Action Items (<span id="action-tab-count">0</span>)</button>
+          <button class="tab-btn" data-tab="tab-decisions">Key Decisions (<span id="decision-tab-count">0</span>)</button>
+          <button class="tab-btn" data-tab="tab-speakers">Speaker Analytics</button>
+          <button class="tab-btn" data-tab="tab-transcript">Full Transcript</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="tab-content-container">
+          <!-- Summary Tab -->
+          <div id="tab-summary" class="tab-pane active">
+            <div class="executive-summary-box" id="detail-summary-content"></div>
+          </div>
+
+          <!-- Actions Tab -->
+          <div id="tab-actions" class="tab-pane">
+            <div class="tab-subbar">
+              <h3>Action Items & Commitments</h3>
+              <button id="btn-add-action-modal" class="btn btn-small btn-gold">+ Add Task</button>
+            </div>
+            <div class="action-items-grid" id="action-items-list"></div>
+          </div>
+
+          <!-- Decisions Tab -->
+          <div id="tab-decisions" class="tab-pane">
+            <div class="tab-subbar">
+              <h3>Ratified Strategic & Operational Decisions</h3>
+            </div>
+            <div class="decisions-timeline" id="decisions-list"></div>
+          </div>
+
+          <!-- Speaker Analytics Tab -->
+          <div id="tab-speakers" class="tab-pane">
+            <div class="tab-subbar">
+              <h3>Voice Distribution & Interaction Dynamics</h3>
+            </div>
+            <div class="speakers-table-container" id="speakers-list"></div>
+          </div>
+
+          <!-- Transcript Tab -->
+          <div id="tab-transcript" class="tab-pane">
+            <div class="transcript-stream" id="transcript-stream"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add Task Modal -->
+  <div id="task-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create Action Item</h3>
+        <button id="btn-close-modal" class="btn-close">&times;</button>
+      </div>
+      <form id="manual-task-form">
+        <div class="form-group">
+          <label for="task-desc">Task Description</label>
+          <input type="text" id="task-desc" required class="text-input" placeholder="e.g. Conduct compliance audit on staging IAM roles">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-assignee">Assignee</label>
+            <input type="text" id="task-assignee" required class="text-input" placeholder="e.g. David Kim">
+          </div>
+          <div class="form-group">
+            <label for="task-due">Due Date</label>
+            <input type="text" id="task-due" value="Friday" class="text-input">
+          </div>
+          <div class="form-group">
+            <label for="task-priority">Priority</label>
+            <select id="task-priority" class="custom-select">
+              <option value="HIGH">HIGH</option>
+              <option value="MEDIUM" selected>MEDIUM</option>
+              <option value="LOW">LOW</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions modal-actions">
+          <button type="button" id="btn-cancel-task" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Action Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

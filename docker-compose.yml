@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  meetingmind-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: meetingmind-platform
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=MeetingMind
+      - DEBUG=False
+      - MEETINGMIND_DB_PATH=/app/data/meetingmind.db
+    volumes:
+      - meetingmind-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  meetingmind-data:
+    driver: local
